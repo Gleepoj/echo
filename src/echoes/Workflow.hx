@@ -41,6 +41,7 @@ class Workflow {
      * All systems that will be called when `update()` is called
      */
     public static var systems(default, null) = new RestrictedLinkedList<ISystem>();
+    public static var systems60fps(default, null) = new RestrictedLinkedList<ISystem>();
 
 
     #if echoes_profiling
@@ -93,6 +94,16 @@ class Workflow {
         #end
     }
 
+    public static function postUpdate(dt:Float) {
+
+        for (s in systems60fps) {
+
+            s.__update__(dt);
+
+        }
+    }
+
+    
 
     /**
      * Removes all views, systems and entities from the workflow, and resets the id sequence 
@@ -103,6 +114,9 @@ class Workflow {
         }
         for (s in systems) {
             removeSystem(s);
+        }
+        for (s in systems60fps){
+            remove60FpsSystem(s);
         }
         for (v in definedViews) {
             v.reset();
@@ -131,6 +145,12 @@ class Workflow {
         }
     }
 
+    public static function add60FpsSystem(s:ISystem) {
+        if (!hasSystem(s)) {
+            systems60fps.add(s);
+            s.__activate__();
+        }
+    }
     /**
      * Removes the system from the workflow
      * @param s `System` instance
@@ -142,6 +162,13 @@ class Workflow {
         }
     }
 
+    public static function remove60FpsSystem(s:ISystem) {
+        if (has60FpsSystem(s)) {
+            s.__deactivate__();
+            systems60fps.remove(s);
+        }
+    }
+
     /**
      * Returns `true` if the system is added to the workflow, otherwise returns `false`  
      * @param s `System` instance
@@ -150,6 +177,11 @@ class Workflow {
     public static function hasSystem(s:ISystem):Bool {
         return systems.exists(s);
     }
+
+    public static function has60FpsSystem(s:ISystem):Bool {
+        return systems60fps.exists(s);
+    }
+
 
 
     // Entity
