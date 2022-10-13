@@ -65,9 +65,12 @@ class Workflow {
         for (s in systems) {
             ret += '\n${ s.info('    ', 1) }';
         }
-        for (v in views) {
-            ret += '\n    {$v} [${ v.entities.length }]';
+        for (s in systems60fps ) {
+            ret += '\n${ s.info('    ', 1) }';
         }
+        /* for (v in views) {
+            ret += '\n    {$v} [${ v.entities.length }]';
+        } */
         #end
 
         return ret;
