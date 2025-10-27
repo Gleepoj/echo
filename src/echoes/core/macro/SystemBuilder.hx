@@ -376,7 +376,7 @@ class SystemBuilder {
 
 }
 
-@:enum abstract MetaFuncType(Int) {
+enum abstract MetaFuncType(Int) {
     var SINGLE_CALL = 1;
     var VIEW_ITER = 2;
     var ENTITY_ITER = 3;
