@@ -41,11 +41,17 @@ class Workflow {
      * All systems that will be called when `update()` is called
      */
     public static var systems(default, null) = new RestrictedLinkedList<ISystem>();
+    /**
+     * All systems that will be called when `postUpdate()` is called.
+     * Despite the name, "60fps" systems are not time-locked: they run each time `postUpdate()` is called
+     * (typically once per rendered frame, with a variable dt). A system belongs to one list only.
+     */
     public static var systems60fps(default, null) = new RestrictedLinkedList<ISystem>();
 
 
     #if echoes_profiling
     static var updateTime = .0;
+    static var postUpdateTime = .0;
     #end
 
 
@@ -58,19 +64,22 @@ class Workflow {
      * @return String
      */
     public static function info():String {
-        var ret = '# ( ${systems.length} ) { ${views.length} } [ ${entities.length} | ${idPool.length} ]'; // TODO version or something
+        var ret = '# ( ${systems.length + systems60fps.length} ) { ${views.length} } [ ${entities.length} | ${idPool.length} ]'; // TODO version or something
 
         #if echoes_profiling
-        ret += ' : $updateTime ms'; // total
+        ret += ' : ${updateTime + postUpdateTime} ms'; // total
         for (s in systems) {
             ret += '\n${ s.info('    ', 1) }';
         }
-        for (s in systems60fps ) {
-            ret += '\n${ s.info('    ', 1) }';
+        if (systems60fps.length > 0) {
+            ret += '\n    postUpdate : $postUpdateTime ms';
+            for (s in systems60fps) {
+                ret += '\n${ s.info('    ', 2) }';
+            }
         }
-        /* for (v in views) {
+        for (v in views) {
             ret += '\n    {$v} [${ v.entities.length }]';
-        } */
+        }
         #end
 
         return ret;
@@ -97,16 +106,23 @@ class Workflow {
         #end
     }
 
+    /**
+     * Updates the "60fps" systems (see `systems60fps`)
+     * @param dt deltatime
+     */
     public static function postUpdate(dt:Float) {
+        #if echoes_profiling
+        var timestamp = Date.now().getTime();
+        #end
 
         for (s in systems60fps) {
-
             s.__update__(dt);
-
         }
-    }
 
-    
+        #if echoes_profiling
+        postUpdateTime = Std.int(Date.now().getTime() - timestamp);
+        #end
+    }
 
     /**
      * Removes all views, systems and entities from the workflow, and resets the id sequence 
@@ -142,14 +158,18 @@ class Workflow {
      * @param s `System` instance
      */
     public static function addSystem(s:ISystem) {
-        if (!hasSystem(s)) {
+        if (!hasSystem(s) && !has60FpsSystem(s)) {
             systems.add(s);
             s.__activate__();
         }
     }
 
+    /**
+     * Adds the system to the workflow, updated by `postUpdate()` (see `systems60fps`)
+     * @param s `System` instance
+     */
     public static function add60FpsSystem(s:ISystem) {
-        if (!hasSystem(s)) {
+        if (!hasSystem(s) && !has60FpsSystem(s)) {
             systems60fps.add(s);
             s.__activate__();
         }
@@ -232,7 +252,9 @@ class Workflow {
     }
 
     @:allow(echoes.Entity) static inline function status(id:Int):Status {
-        return statuses[id];
+        // Out of range = Entity.INVALID, or an entity created before the last `reset()`.
+        // (Reading past the array returns 0 = Inactive on some targets, making stale entities look valid.)
+        return id < 0 || id >= statuses.length ? Invalid : statuses[id];
     }
 
     @:allow(echoes.Entity) static inline function removeAllComponentsOf(id:Int) {

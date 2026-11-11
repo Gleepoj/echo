@@ -36,7 +36,7 @@ class SystemList implements ISystem {
     }
 
 
-    @:noCompletion @:final public function __activate__() {
+    @:noCompletion final public function __activate__() {
         if (!activated) {
             activated = true;
             for (s in systems) {
@@ -45,7 +45,7 @@ class SystemList implements ISystem {
         }
     }
 
-    @:noCompletion @:final public function __deactivate__() {
+    @:noCompletion final public function __deactivate__() {
         if (activated) {
             activated = false;
             for (s in systems) {
@@ -54,7 +54,7 @@ class SystemList implements ISystem {
         }
     }
 
-    @:noCompletion @:final public function __update__(dt:Float) {
+    @:noCompletion final public function __update__(dt:Float) {
         #if echoes_profiling
         var __timestamp__ = Date.now().getTime();
         #end
