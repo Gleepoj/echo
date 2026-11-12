@@ -3,10 +3,10 @@ import echoes.Workflow;
 
 using buddy.Should;
 
-/** Regression tests for the fork changes (60fps system list, stale entities) **/
+/** Regression tests for the fork changes (fixed/post system lists, stale entities) **/
 class WorkflowFixesTest extends buddy.BuddySuite {
     public function new() {
-        describe("Test 60fps systems", {
+        describe("Test post systems", {
             var s:CountingSystem;
 
             beforeEach({
@@ -15,34 +15,50 @@ class WorkflowFixesTest extends buddy.BuddySuite {
             });
 
             it("should be updated once per postUpdate, even if added twice", {
-                Workflow.add60FpsSystem(s);
-                Workflow.add60FpsSystem(s);
+                Workflow.addPostSystem(s);
+                Workflow.addPostSystem(s);
                 Workflow.postUpdate(0);
-                Workflow.systems60fps.length.should.be(1);
+                Workflow.postSystems.length.should.be(1);
                 s.count.should.be(1);
             });
 
             it("should not be added to both lists", {
-                Workflow.add60FpsSystem(s);
-                Workflow.addSystem(s);
-                Workflow.update(0);
+                Workflow.addPostSystem(s);
+                Workflow.addFixedSystem(s);
+                Workflow.fixedUpdate(0);
                 Workflow.postUpdate(0);
-                Workflow.systems.length.should.be(0);
+                Workflow.fixedSystems.length.should.be(0);
                 s.count.should.be(1);
             });
 
             it("should be updated by postUpdate only", {
-                Workflow.add60FpsSystem(s);
-                Workflow.update(0);
+                Workflow.addPostSystem(s);
+                Workflow.fixedUpdate(0);
                 s.count.should.be(0);
                 Workflow.postUpdate(0);
                 s.count.should.be(1);
             });
 
+            it("should be found by hasSystem and hasPostSystem only", {
+                Workflow.addPostSystem(s);
+                Workflow.hasSystem(s).should.be(true);
+                Workflow.hasPostSystem(s).should.be(true);
+                Workflow.hasFixedSystem(s).should.be(false);
+            });
+
+            it("should be removed by removeSystem", {
+                Workflow.addPostSystem(s);
+                Workflow.removeSystem(s);
+                Workflow.hasSystem(s).should.be(false);
+                s.isActive().should.be(false);
+                Workflow.postUpdate(0);
+                s.count.should.be(0);
+            });
+
             it("should be removed by reset", {
-                Workflow.add60FpsSystem(s);
+                Workflow.addPostSystem(s);
                 Workflow.reset();
-                Workflow.systems60fps.length.should.be(0);
+                Workflow.postSystems.length.should.be(0);
                 s.isActive().should.be(false);
             });
         });

@@ -27,8 +27,8 @@ class Example {
       .add(new Movement())
       .add(new CollisionResolver());
 
-    Workflow.addSystem(physics);
-    Workflow.addSystem(new Render()); // or just add systems directly
+    Workflow.addFixedSystem(physics);
+    Workflow.addFixedSystem(new Render()); // or just add systems directly
 
     var john = createRabbit(0, 0, 1, 1, 'John');
     var jack = createRabbit(5, 5, 1, 1, 'Jack');
@@ -39,7 +39,7 @@ class Example {
     jack.add(new Position(1, 1)); // okay
 
     // also somewhere should be Workflow.update call on every tick
-    Workflow.update(1.0);
+    Workflow.fixedUpdate(1.0);
   }
   static function createTree(x:Float, y:Float) {
     return new Entity()

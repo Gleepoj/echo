@@ -22,7 +22,7 @@ class ViewTest extends buddy.BuddySuite {
                 var entities:Array<Entity>;
 
                 beforeEach({
-                    Workflow.addSystem(mvs);
+                    Workflow.addFixedSystem(mvs);
                     entities = new Array<Entity>();
                 });
 
@@ -51,7 +51,7 @@ class ViewTest extends buddy.BuddySuite {
                             for (e in entities) {
                                 e.add(new C());
                             }
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should matching correctly", {
                             mvs.a.entities.length.should.be(300);
@@ -67,7 +67,7 @@ class ViewTest extends buddy.BuddySuite {
                             for (e in entities) {
                                 e.remove(C);
                             }
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should matching correctly", {
                             mvs.a.entities.length.should.be(300);
@@ -82,7 +82,7 @@ class ViewTest extends buddy.BuddySuite {
                                 for (e in entities) {
                                     e.add(new C());
                                 }
-                                Workflow.update(0);
+                                Workflow.fixedUpdate(0);
                             });
                             it("should matching correctly", {
                                 mvs.a.entities.length.should.be(300);
@@ -99,7 +99,7 @@ class ViewTest extends buddy.BuddySuite {
                             for (e in entities) {
                                 e.removeAll();
                             }
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should matching correctly", {
                             mvs.a.entities.length.should.be(0);
@@ -115,7 +115,7 @@ class ViewTest extends buddy.BuddySuite {
                             for(e in entities) {
                                 e.deactivate();
                             }
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should matching correctly", {
                             mvs.a.entities.length.should.be(0);
@@ -130,7 +130,7 @@ class ViewTest extends buddy.BuddySuite {
                                 for(e in entities) {
                                     e.activate();
                                 }
-                                Workflow.update(0);
+                                Workflow.fixedUpdate(0);
                             });
                             it("should matching correctly", {
                                 mvs.a.entities.length.should.be(300);
@@ -147,7 +147,7 @@ class ViewTest extends buddy.BuddySuite {
                             for(e in entities) {
                                 e.destroy();
                             }
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should matching correctly", {
                             mvs.a.entities.length.should.be(0);
@@ -167,7 +167,7 @@ class ViewTest extends buddy.BuddySuite {
                 var onrm = function(id:Entity, a:A, v:V) log += '-$v';
 
                 beforeEach({
-                    Workflow.addSystem(mvs);
+                    Workflow.addFixedSystem(mvs);
                     mvs.av.onAdded.add(onad);
                     mvs.av.onRemoved.add(onrm);
                     e = new Entity();
@@ -245,7 +245,7 @@ class ViewTest extends buddy.BuddySuite {
                 var onrm = function(id:Entity, a:A, v:V) log += '-$v';
 
                 beforeEach({
-                    Workflow.addSystem(ivs);
+                    Workflow.addFixedSystem(ivs);
                     ivs.av.onAdded.add(onad);
                     ivs.av.onRemoved.add(onrm);
                     for (i in 0...5) new Entity().add(new A(), new V(i));
@@ -254,7 +254,7 @@ class ViewTest extends buddy.BuddySuite {
                 describe("When iterating", {
                     beforeEach({
                         ivs.f = function(id, a, v) log += '$v';
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(5));
                     it("should have correct log", log.should.be("+0+1+2+3+401234"));
@@ -262,7 +262,7 @@ class ViewTest extends buddy.BuddySuite {
                     describe("Then add an Entity and iterating", {
                         beforeEach({
                             new Entity().add(new A(), new V(5));
-                            Workflow.update(0);
+                            Workflow.fixedUpdate(0);
                         });
                         it("should have correct length", ivs.av.entities.length.should.be(6));
                         it("should have correct log", log.should.be("+0+1+2+3+401234+5012345"));
@@ -272,7 +272,7 @@ class ViewTest extends buddy.BuddySuite {
                 describe("Then remove Component while iterating", {
                     beforeEach({
                         ivs.f = function(id, a, v) id.remove(V);
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -281,7 +281,7 @@ class ViewTest extends buddy.BuddySuite {
                 describe("Then remove all of Components while iterating", {
                     beforeEach({
                         ivs.f = function(id, a, v) id.removeAll();
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -290,7 +290,7 @@ class ViewTest extends buddy.BuddySuite {
                 describe("Then destroy Entity while iterating", {
                     beforeEach({
                         ivs.f = function(id, a, v) id.destroy();
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -299,7 +299,7 @@ class ViewTest extends buddy.BuddySuite {
                 describe("Then deactivate Entity while iterating", {
                     beforeEach({
                         ivs.f = function(id, a, v) id.deactivate();
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -312,7 +312,7 @@ class ViewTest extends buddy.BuddySuite {
                                 new Entity().add(new A(), new V(9));
                             }
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(10));
                     it("should have correct log", log.should.be("+0+1+2+3+4+9+9+9+9+9"));
@@ -326,7 +326,7 @@ class ViewTest extends buddy.BuddySuite {
                                 new Entity().add(new A(), new V(9));
                             }
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(5));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0+9-1+9-2+9-3+9-4+9"));
@@ -337,7 +337,7 @@ class ViewTest extends buddy.BuddySuite {
                         ivs.f = function(id, a, v) {
                             ivs.av.iter(function(e, a, v) e.remove(V));
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -348,7 +348,7 @@ class ViewTest extends buddy.BuddySuite {
                         ivs.f = function(id, a, v) {
                             ivs.av.iter(function(e, a, v) e.removeAll());
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -359,7 +359,7 @@ class ViewTest extends buddy.BuddySuite {
                         ivs.f = function(id, a, v) {
                             ivs.av.iter(function(e, a, v) e.destroy());
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -370,7 +370,7 @@ class ViewTest extends buddy.BuddySuite {
                         ivs.f = function(id, a, v) {
                             ivs.av.iter(function(e, a, v) e.deactivate());
                         }
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct length", ivs.av.entities.length.should.be(0));
                     it("should have correct log", log.should.be("+0+1+2+3+4-0-1-2-3-4"));
@@ -440,7 +440,7 @@ class ViewTest extends buddy.BuddySuite {
 
                 describe("Initially", {
                     beforeEach({
-                        Workflow.addSystem(ivs);
+                        Workflow.addFixedSystem(ivs);
                         var id = 0;
                         for (i in 0...3) {
                             for (j in 1...4) {

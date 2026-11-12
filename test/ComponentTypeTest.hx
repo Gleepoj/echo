@@ -16,7 +16,7 @@ class ComponentTypeTest extends buddy.BuddySuite {
                 beforeEach({
                     e = new Entity();
                     s = new ComponentTypeSystem();
-                    Workflow.addSystem(s);
+                    Workflow.addFixedSystem(s);
                 });
 
                 it("views should be empty", {
@@ -47,7 +47,7 @@ class ComponentTypeTest extends buddy.BuddySuite {
                     str += "\n    \\{TypeParamComponent\\<Array\\<ObjectComponent\\>\\>\\} \\[0\\]";
                     #end
                     beforeEach({
-                        Workflow.update(0);
+                        Workflow.fixedUpdate(0);
                     });
                     it("should have correct result", Workflow.info().should.match(new EReg(str, "")));
                 });

@@ -11,7 +11,7 @@ import echoes.utils.LinkedList;
  *   var physics = new SystemList();
  *   physics.add(new MovementSystem());
  *   physics.add(new CollisionResolveSystem());
- *   Workflow.add(physics);
+ *   Workflow.addFixedSystem(physics);
  * ```
  * 
  * @author https://github.com/deepcake

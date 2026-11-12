@@ -9,6 +9,11 @@ import echoes.core.RestrictedLinkedList;
 /**
  *  Workflow  
  * 
+ * Systems live in one of two lists, named after the deepnight game loop hooks that update them:
+ * - **fixed** systems, updated by `fixedUpdate(dt)`: called a fixed number of times per second (simulation, physics, rules),
+ * - **post** systems, updated by `postUpdate(dt)`: called once per rendered frame, variable dt (display, camera, UI, input).
+ * A system belongs to one list only.
+ * 
  * @author https://github.com/deepcake
  */
 class Workflow {
@@ -38,19 +43,17 @@ class Workflow {
     public static var views(default, null) = new RestrictedLinkedList<AbstractView>();
 
     /**
-     * All systems that will be called when `update()` is called
+     * Systems updated by `fixedUpdate()`
      */
-    public static var systems(default, null) = new RestrictedLinkedList<ISystem>();
+    public static var fixedSystems(default, null) = new RestrictedLinkedList<ISystem>();
     /**
-     * All systems that will be called when `postUpdate()` is called.
-     * Despite the name, "60fps" systems are not time-locked: they run each time `postUpdate()` is called
-     * (typically once per rendered frame, with a variable dt). A system belongs to one list only.
+     * Systems updated by `postUpdate()`
      */
-    public static var systems60fps(default, null) = new RestrictedLinkedList<ISystem>();
+    public static var postSystems(default, null) = new RestrictedLinkedList<ISystem>();
 
 
     #if echoes_profiling
-    static var updateTime = .0;
+    static var fixedUpdateTime = .0;
     static var postUpdateTime = .0;
     #end
 
@@ -64,16 +67,16 @@ class Workflow {
      * @return String
      */
     public static function info():String {
-        var ret = '# ( ${systems.length + systems60fps.length} ) { ${views.length} } [ ${entities.length} | ${idPool.length} ]'; // TODO version or something
+        var ret = '# ( ${fixedSystems.length + postSystems.length} ) { ${views.length} } [ ${entities.length} | ${idPool.length} ]'; // TODO version or something
 
         #if echoes_profiling
-        ret += ' : ${updateTime + postUpdateTime} ms'; // total
-        for (s in systems) {
+        ret += ' : ${fixedUpdateTime + postUpdateTime} ms'; // total
+        for (s in fixedSystems) {
             ret += '\n${ s.info('    ', 1) }';
         }
-        if (systems60fps.length > 0) {
+        if (postSystems.length > 0) {
             ret += '\n    postUpdate : $postUpdateTime ms';
-            for (s in systems60fps) {
+            for (s in postSystems) {
                 ret += '\n${ s.info('    ', 2) }';
             }
         }
@@ -87,35 +90,33 @@ class Workflow {
 
 
     /**
-     * Update 
-     * @param dt deltatime
+     * Updates the fixed systems (see `fixedSystems`)
+     * @param dt deltatime of one fixed step
      */
-    public static function update(dt:Float) {
+    public static function fixedUpdate(dt:Float) {
         #if echoes_profiling
         var timestamp = Date.now().getTime();
         #end
 
-        for (s in systems) {
-
+        for (s in fixedSystems) {
             s.__update__(dt);
-
         }
 
         #if echoes_profiling
-        updateTime = Std.int(Date.now().getTime() - timestamp);
+        fixedUpdateTime = Std.int(Date.now().getTime() - timestamp);
         #end
     }
 
     /**
-     * Updates the "60fps" systems (see `systems60fps`)
-     * @param dt deltatime
+     * Updates the post systems (see `postSystems`)
+     * @param dt deltatime of the frame
      */
     public static function postUpdate(dt:Float) {
         #if echoes_profiling
         var timestamp = Date.now().getTime();
         #end
 
-        for (s in systems60fps) {
+        for (s in postSystems) {
             s.__update__(dt);
         }
 
@@ -131,11 +132,11 @@ class Workflow {
         for (e in entities) {
             e.destroy();
         }
-        for (s in systems) {
+        for (s in fixedSystems) {
             removeSystem(s);
         }
-        for (s in systems60fps){
-            remove60FpsSystem(s);
+        for (s in postSystems) {
+            removeSystem(s);
         }
         for (v in definedViews) {
             v.reset();
@@ -154,55 +155,57 @@ class Workflow {
     // System
 
     /**
-     * Adds the system to the workflow
+     * Adds the system to the workflow, updated by `fixedUpdate()`. Ignored if it is already added (to any list)
      * @param s `System` instance
      */
-    public static function addSystem(s:ISystem) {
-        if (!hasSystem(s) && !has60FpsSystem(s)) {
-            systems.add(s);
+    public static function addFixedSystem(s:ISystem) {
+        if (!hasSystem(s)) {
+            fixedSystems.add(s);
             s.__activate__();
         }
     }
 
     /**
-     * Adds the system to the workflow, updated by `postUpdate()` (see `systems60fps`)
+     * Adds the system to the workflow, updated by `postUpdate()`. Ignored if it is already added (to any list)
      * @param s `System` instance
      */
-    public static function add60FpsSystem(s:ISystem) {
-        if (!hasSystem(s) && !has60FpsSystem(s)) {
-            systems60fps.add(s);
+    public static function addPostSystem(s:ISystem) {
+        if (!hasSystem(s)) {
+            postSystems.add(s);
             s.__activate__();
         }
     }
+
     /**
-     * Removes the system from the workflow
+     * Removes the system from the workflow, whichever list it is in
      * @param s `System` instance
      */
     public static function removeSystem(s:ISystem) {
-        if (hasSystem(s)) {
+        if (fixedSystems.exists(s)) {
             s.__deactivate__();
-            systems.remove(s);
+            fixedSystems.remove(s);
         }
-    }
-
-    public static function remove60FpsSystem(s:ISystem) {
-        if (has60FpsSystem(s)) {
+        else if (postSystems.exists(s)) {
             s.__deactivate__();
-            systems60fps.remove(s);
+            postSystems.remove(s);
         }
     }
 
     /**
-     * Returns `true` if the system is added to the workflow, otherwise returns `false`  
+     * Returns `true` if the system is added to the workflow (to any list)
      * @param s `System` instance
      * @return `Bool`
      */
     public static function hasSystem(s:ISystem):Bool {
-        return systems.exists(s);
+        return hasFixedSystem(s) || hasPostSystem(s);
     }
 
-    public static function has60FpsSystem(s:ISystem):Bool {
-        return systems60fps.exists(s);
+    public static inline function hasFixedSystem(s:ISystem):Bool {
+        return fixedSystems.exists(s);
+    }
+
+    public static inline function hasPostSystem(s:ISystem):Bool {
+        return postSystems.exists(s);
     }
 
 

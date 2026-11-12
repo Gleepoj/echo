@@ -18,19 +18,19 @@ class SystemMetaTest extends buddy.BuddySuite {
                 var s1 = new SystemUpdateMeta();
 
                 describe("Then update", {
-                    beforeEach(Workflow.update(0));
+                    beforeEach(Workflow.fixedUpdate(0));
                     it("should have correct result", {
                         BuildResult.value.should.be('');
                     });
 
                     describe("Then add system to the flow", {
-                        beforeEach(Workflow.addSystem(s1));
+                        beforeEach(Workflow.addFixedSystem(s1));
                         it("should have correct result", {
                             BuildResult.value.should.be('^');
                         });
 
                         describe("Then update", {
-                            beforeEach(Workflow.update(0));
+                            beforeEach(Workflow.fixedUpdate(0));
                             it("should have correct result", {
                                 BuildResult.value.should.be('^[0____]');
                             });
@@ -44,7 +44,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                                 });
             
                                 describe("Then update", {
-                                    beforeEach(Workflow.update(0));
+                                    beforeEach(Workflow.fixedUpdate(0));
                                     it("should have correct result", {
                                         BuildResult.value.should.be('^[0____][0___0e0e_]');
                                     });
@@ -58,7 +58,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                                         });
 
                                         describe("Then update", {
-                                            beforeEach(Workflow.update(0));
+                                            beforeEach(Workflow.fixedUpdate(0));
                                             it("should have correct result", {
                                                 BuildResult.value.should.be('^[0____][0___0e0e_][0_AA_0A0A_0e0e_0eA0eA]');
                                             });
@@ -72,7 +72,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                                                 });
         
                                                 describe("Then update", {
-                                                    beforeEach(Workflow.update(0));
+                                                    beforeEach(Workflow.fixedUpdate(0));
                                                     it("should have correct result", {
                                                         BuildResult.value.should.be('^[0____][0___0e0e_][0_AA_0A0A_0e0e_0eA0eA][0_AA_0A0A_0e0e_0eA0eA0eB0eB0eAB0eAB]');
                                                     });
@@ -84,7 +84,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                                                         });
                             
                                                         describe("Then update", {
-                                                            beforeEach(Workflow.update(0));
+                                                            beforeEach(Workflow.fixedUpdate(0));
                                                             it("should have correct result", {
                                                                 BuildResult.value.should.be('^[0____][0___0e0e_][0_AA_0A0A_0e0e_0eA0eA][0_AA_0A0A_0e0e_0eA0eA0eB0eB0eAB0eAB]$');
                                                             });
@@ -114,7 +114,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                     });
 
                     describe("Then add System to the flow", {
-                        beforeEach(Workflow.addSystem(s1));
+                        beforeEach(Workflow.addFixedSystem(s1));
                         it("should have correct result", {
                             BuildResult.value.should.be('+A+A>A>A+Ae+Ae');
                         });
@@ -138,7 +138,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                 });
 
                 describe("Then add System to the flow", {
-                    beforeEach(Workflow.addSystem(s1));
+                    beforeEach(Workflow.addFixedSystem(s1));
                     it("should correctly add listeners", {
                         ViewCompA.inst().isActive().should.be(true);
                         ViewCompA.inst().onAdded.size().should.be(3);
@@ -175,7 +175,7 @@ class SystemMetaTest extends buddy.BuddySuite {
                     describe("Then add a second System with equal View to the flow", {
                         var s2 = new SystemAddRemMeta2();
 
-                        beforeEach(Workflow.addSystem(s2));
+                        beforeEach(Workflow.addFixedSystem(s2));
                         it("should correctly add listeners", {
                             ViewCompA.inst().isActive().should.be(true);
                             ViewCompA.inst().onAdded.size().should.be(4);
