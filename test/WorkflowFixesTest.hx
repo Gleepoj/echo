@@ -63,6 +63,33 @@ class WorkflowFixesTest extends buddy.BuddySuite {
             });
         });
 
+        describe("Test deprecated names", {
+            var s:CountingSystem;
+
+            beforeEach({
+                Workflow.reset();
+                s = new CountingSystem();
+            });
+
+            it("addSystem + update should behave like addFixedSystem + fixedUpdate", {
+                Workflow.addSystem(s);
+                Workflow.hasFixedSystem(s).should.be(true);
+                Workflow.systems.length.should.be(1);
+                Workflow.update(0);
+                s.count.should.be(1);
+            });
+
+            it("add60FpsSystem should behave like addPostSystem", {
+                Workflow.add60FpsSystem(s);
+                Workflow.has60FpsSystem(s).should.be(true);
+                Workflow.systems60fps.length.should.be(1);
+                Workflow.postUpdate(0);
+                s.count.should.be(1);
+                Workflow.remove60FpsSystem(s);
+                Workflow.hasSystem(s).should.be(false);
+            });
+        });
+
         describe("Test stale entities", {
             beforeEach({
                 Workflow.reset();

@@ -210,6 +210,31 @@ class Workflow {
 
 
 
+    // Deprecated names (before the fixed/post rename), kept so older projects still compile
+
+    @:deprecated("Use Workflow.fixedSystems") public static var systems(get, never):RestrictedLinkedList<ISystem>;
+    static inline function get_systems() return fixedSystems;
+
+    @:deprecated("Use Workflow.postSystems") public static var systems60fps(get, never):RestrictedLinkedList<ISystem>;
+    static inline function get_systems60fps() return postSystems;
+
+    @:deprecated("Use Workflow.fixedUpdate(dt)")
+    public static inline function update(dt:Float) fixedUpdate(dt);
+
+    @:deprecated("Use Workflow.addFixedSystem(s)")
+    public static inline function addSystem(s:ISystem) addFixedSystem(s);
+
+    @:deprecated("Use Workflow.addPostSystem(s)")
+    public static inline function add60FpsSystem(s:ISystem) addPostSystem(s);
+
+    @:deprecated("Use Workflow.removeSystem(s)")
+    public static inline function remove60FpsSystem(s:ISystem) removeSystem(s);
+
+    @:deprecated("Use Workflow.hasPostSystem(s)")
+    public static inline function has60FpsSystem(s:ISystem):Bool return hasPostSystem(s);
+
+
+
     // Entity
 
     @:allow(echoes.Entity) static function id(immediate:Bool):Int {
